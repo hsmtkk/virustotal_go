@@ -15,3 +15,22 @@ steps:
       - go test
       - cd parser
       - go test
+  - name: build
+    image: golang:1.14
+    environment:
+      VIRUS_TOTAL_API_KEY:
+        from_secret: VIRUS_TOTAL_API_KEY
+      CGO_ENABLED: "0"
+    commands:
+      - cd cmd/virustotal
+      - go build
+  - name: run
+    image: alpine:3.11.6
+    depends_on:
+      - build
+    environment:
+      VIRUS_TOTAL_API_KEY:
+        from_secret: VIRUS_TOTAL_API_KEY
+    commands:
+      - cd cmd/virustotal
+      - ./virustotal filesid f4d76f4ad2977077b00035901b614d04a1fd5e5dec9d22309279304c8da56865
