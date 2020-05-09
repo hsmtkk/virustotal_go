@@ -5,6 +5,9 @@ name: default
 steps:
   - name: test
     image: golang:1.14
+    environment:
+      VIRUS_TOTAL_API_KEY:
+        from_secret: VIRUS_TOTAL_API_KEY
     commands:
       - cd pkg/apikey
       - go test
