@@ -6,7 +6,7 @@ steps:
   - name: lint
     image: sdesbure/yamllint
     commands:
-      - yamllint .drone.yml
+      - yamllint -d relaxed .drone.yml
   - name: test
     depends_on:
       - lint
