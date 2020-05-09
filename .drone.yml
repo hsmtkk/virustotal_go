@@ -3,7 +3,13 @@ type: docker
 name: default
 
 steps:
+  - name: lint
+    image: sdesbure/yamllint
+    commands:
+      - yamllint -d relaxed .drone.yml
   - name: test
+    depends_on:
+      - lint
     image: golang:1.14
     environment:
       VIRUS_TOTAL_API_KEY:
@@ -16,6 +22,8 @@ steps:
       - cd parser
       - go test
   - name: build
+    depends_on:
+      - lint
     image: golang:1.14
     environment:
       VIRUS_TOTAL_API_KEY:
@@ -25,9 +33,9 @@ steps:
       - cd cmd/virustotal
       - go build
   - name: run
-    image: alpine:3.11.6
     depends_on:
       - build
+    image: alpine:3.11.6
     environment:
       VIRUS_TOTAL_API_KEY:
         from_secret: VIRUS_TOTAL_API_KEY
