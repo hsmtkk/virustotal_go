@@ -39,5 +39,5 @@ steps:
         from_secret: VIRUS_TOTAL_API_KEY
     commands:
       - cd cmd/virustotal
-      . ./virustotal files ./virustotal
+      - ./virustotal files ./virustotal
       - ./virustotal filesid f4d76f4ad2977077b00035901b614d04a1fd5e5dec9d22309279304c8da56865
