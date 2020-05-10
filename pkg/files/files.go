@@ -2,22 +2,26 @@ package files
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
+
+	"github.com/hsmtkk/virustotal_go/pkg"
+	"github.com/hsmtkk/virustotal_go/pkg/files/parser"
 )
 
 type UploadAnalyzer interface {
-	UploadAnalyze(contents []byte) (string, error)
+	UploadAnalyze(fileName string, contents []byte) (string, error)
 }
 
-const endPoint = "https://www.virustotal.com/api/v3/files"
-
 func New(apiKey string) UploadAnalyzer {
+	endPoint := "https://www.virustotal.com/api/v3/files"
 	return &uploadAnalyzerImpl{client: http.DefaultClient, endPoint: endPoint, apiKey: apiKey}
 }
 
 func NewForTest(client *http.Client, endPoint string) UploadAnalyzer {
-	return &uploadAnalyzerImpl{client: client, endPoint: endPoint}
+	return &uploadAnalyzerImpl{client: client, endPoint: endPoint, apiKey: "dummy"}
 }
 
 type uploadAnalyzerImpl struct {
@@ -26,18 +30,18 @@ type uploadAnalyzerImpl struct {
 	apiKey   string
 }
 
-const applicationJson = "application/json"
-
-// TODO mutlipart/form-data
-// https://ayada.dev/posts/multipart-requests-in-go/
-
-func (self *uploadAnalyzerImpl) UploadAnalyze(contents []byte) (string, error) {
-	req, err := http.NewRequest(http.MethodPost, self.endPoint, bytes.NewReader(contents))
+func (imp *uploadAnalyzerImpl) UploadAnalyze(fileName string, contents []byte) (string, error) {
+	formData, contentType, err := makeFormData(fileName, contents)
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set(xApiKey, self.apiKey)
-	resp, err := self.client.Do(req)
+	req, err := http.NewRequest(http.MethodPost, imp.endPoint, bytes.NewReader(formData))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", contentType)
+	req.Header.Set(pkg.XAPIKey, imp.apiKey)
+	resp, err := imp.client.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -46,5 +50,25 @@ func (self *uploadAnalyzerImpl) UploadAnalyze(contents []byte) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(bs), nil
+	ps := parser.New()
+	id, err := ps.ParseResponse(string(bs))
+	if err != nil {
+		return "", err
+	}
+	return id, nil
+}
+
+func makeFormData(fileName string, contents []byte) ([]byte, string, error) {
+	var buf bytes.Buffer
+	mimeWriter := multipart.NewWriter(&buf)
+	partWriter, err := mimeWriter.CreateFormFile("file", fileName)
+	n, err := partWriter.Write(contents)
+	if err != nil {
+		return nil, "", err
+	}
+	if n < len(contents) {
+		return nil, "", fmt.Errorf("failed to write all contents")
+	}
+	mimeWriter.Close()
+	return buf.Bytes(), mimeWriter.FormDataContentType(), nil
 }
