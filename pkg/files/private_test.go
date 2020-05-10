@@ -8,7 +8,8 @@ import (
 )
 
 func TestMakeFormData(t *testing.T) {
-	data, err := makeFormData([]byte("example"))
+	data, contentType, err := makeFormData("example.txt", []byte("example"))
 	assert.Nil(t, err, "should be nil")
+	log.Println(contentType)
 	log.Println(string(data))
 }

@@ -19,7 +19,7 @@ func TestReal(t *testing.T) {
 	apiKey, err := apikey.New().LoadAPIKey()
 	assert.Nil(t, err, "should be nil")
 	api := files.New(apiKey)
-	id, err := api.UploadAnalyze(readFile())
+	id, err := api.UploadAnalyze("example_response.json", readFile())
 	assert.Nil(t, err, "should be nil")
 	assert.NotEmpty(t, id, "should not be empty")
 }
@@ -36,7 +36,7 @@ func TestLocal(t *testing.T) {
 	defer ts.Close()
 
 	api := files.NewForTest(ts.Client(), ts.URL)
-	_, err := api.UploadAnalyze(readFile())
+	_, err := api.UploadAnalyze("example_response.json", readFile())
 	assert.Nil(t, err, "should be nil")
 }
 
