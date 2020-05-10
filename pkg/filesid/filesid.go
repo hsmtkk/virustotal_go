@@ -27,14 +27,14 @@ type informationRetrieverImpl struct {
 	apiKey   string
 }
 
-func (self *informationRetrieverImpl) RetrieveInformation(hash string) (pkg.LastAnalysisStats, error) {
-	url := self.endPoint + "/" + hash
+func (imp *informationRetrieverImpl) RetrieveInformation(hash string) (pkg.LastAnalysisStats, error) {
+	url := imp.endPoint + "/" + hash
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return pkg.LastAnalysisStats{}, err
 	}
-	req.Header.Set(pkg.XAPIKey, self.apiKey)
-	resp, err := self.client.Do(req)
+	req.Header.Set(pkg.XAPIKey, imp.apiKey)
+	resp, err := imp.client.Do(req)
 	if err != nil {
 		return pkg.LastAnalysisStats{}, err
 	}

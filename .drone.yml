@@ -15,12 +15,11 @@ steps:
       VIRUS_TOTAL_API_KEY:
         from_secret: VIRUS_TOTAL_API_KEY
     commands:
-      - cd pkg/apikey
-      - go test
-      - cd ../filesid
-      - go test
-      - cd parser
-      - go test
+      - cd pkg/apikey && go test
+      - cd ../files && go test
+      - cd parser && go test
+      - cd ../../filesid && go test
+      - cd parser && go test
   - name: build
     depends_on:
       - lint
@@ -30,8 +29,7 @@ steps:
         from_secret: VIRUS_TOTAL_API_KEY
       CGO_ENABLED: "0"
     commands:
-      - cd cmd/virustotal
-      - go build
+      - cd cmd/virustotal && go build
   - name: run
     depends_on:
       - build
@@ -41,4 +39,5 @@ steps:
         from_secret: VIRUS_TOTAL_API_KEY
     commands:
       - cd cmd/virustotal
+      . ./virustotal files ./virustotal
       - ./virustotal filesid f4d76f4ad2977077b00035901b614d04a1fd5e5dec9d22309279304c8da56865

@@ -24,7 +24,7 @@ type responseSchema struct {
 
 type responseParserImpl struct{}
 
-func (self *responseParserImpl) ParseResponse(js string) (pkg.LastAnalysisStats, error) {
+func (imp *responseParserImpl) ParseResponse(js string) (pkg.LastAnalysisStats, error) {
 	rs := responseSchema{}
 	err := json.Unmarshal([]byte(js), &rs)
 	if err != nil {
